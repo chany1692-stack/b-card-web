@@ -31,9 +31,9 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('./service-work
 const canvas=document.getElementById('game'),overlay=document.getElementById('overlay'),status=document.getElementById('status'),bar=document.getElementById('progress'),error=document.getElementById('error');
 function fail(e){status.textContent='게임을 시작하지 못했습니다.';error.textContent=String(e||'브라우저 호환성과 네트워크 연결을 확인해주세요.');error.style.display='block';document.getElementById('retry').style.display='inline-block'}
 window.addEventListener('error',e=>fail(e.message));window.addEventListener('unhandledrejection',e=>fail(e.reason));
-const buildUrl='Build',loaderUrl=buildUrl+'/4b0822c6cf9761ecae5d56634e829069.loader.js';
-const config={dataUrl:buildUrl+'/f4b3456d10b77e8192ce39984710410e.data.unityweb',frameworkUrl:buildUrl+'/a2a97323bfd288f3fae864999e55de28.framework.js.unityweb',codeUrl:buildUrl+'/7edd564358a37de2f5afe013e6953d4e.wasm.unityweb',streamingAssetsUrl:'StreamingAssets',companyName:"DefaultCompany",productName:"b-card",productVersion:"1.0",devicePixelRatio:Math.min(window.devicePixelRatio||1,1.5),cacheControl:()=> 'no-store',showBanner:(message,type)=>{if(type==='error')fail(message)}};
-const buildVersion='974b85d4861144b98407388776a82695';
+const buildUrl='Build',loaderUrl=buildUrl+'/8ed1229f8523712139e82c6f1abb91ac.loader.js';
+const config={dataUrl:buildUrl+'/f9687db65e44079e0f2d9c95a857deff.data.unityweb',frameworkUrl:buildUrl+'/a49f6e4fea435a48d0644e824a49a362.framework.js.unityweb',codeUrl:buildUrl+'/e302d76f000889ed2639e1483b957746.wasm.unityweb',streamingAssetsUrl:'StreamingAssets',companyName:"DefaultCompany",productName:"b-card",productVersion:"1.0",devicePixelRatio:Math.min(window.devicePixelRatio||1,1.5),cacheControl:()=> 'no-store',showBanner:(message,type)=>{if(type==='error')fail(message)}};
+const buildVersion='d7b34978067d4460a8bf4b051b84119b';
 function startGame(){
  const loader=document.createElement('script');loader.src=loaderUrl;loader.onerror=()=>fail('게임 파일을 불러오지 못했습니다.');loader.onload=()=>createUnityInstance(canvas,config,p=>{bar.style.width=Math.round(p*100)+'%';status.textContent='게임 불러오는 중 '+Math.round(p*100)+'%'}).then(()=>{overlay.style.display='none'}).catch(fail);document.body.appendChild(loader);
 }
