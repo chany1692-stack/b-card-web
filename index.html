@@ -32,8 +32,8 @@ const canvas=document.getElementById('game'),overlay=document.getElementById('ov
 function fail(e){status.textContent='게임을 시작하지 못했습니다.';error.textContent=String(e||'브라우저 호환성과 네트워크 연결을 확인해주세요.');error.style.display='block';document.getElementById('retry').style.display='inline-block'}
 window.addEventListener('error',e=>fail(e.message));window.addEventListener('unhandledrejection',e=>fail(e.reason));
 const buildUrl='Build',loaderUrl=buildUrl+'/68f2a5554ebbdf57fdef66f300667e61.loader.js';
-const config={dataUrl:buildUrl+'/538b0f087468109fe99a999d03041095.data.unityweb',frameworkUrl:buildUrl+'/745d3302cef3f70a33a2779b383b3204.framework.js.unityweb',codeUrl:buildUrl+'/0f5c600c5ab9b274fce03a1b210c6a98.wasm.unityweb',streamingAssetsUrl:'StreamingAssets',companyName:"DefaultCompany",productName:"b-card",productVersion:"1.0",devicePixelRatio:Math.min(window.devicePixelRatio||1,1.5),cacheControl:()=> 'no-store',showBanner:(message,type)=>{if(type==='error')fail(message)}};
-const buildVersion='73a7f3f424274ff7b143c962a880e208';
+const config={dataUrl:buildUrl+'/08d80f02db8d660ba0b70c9dc3bd728c.data.unityweb',frameworkUrl:buildUrl+'/745d3302cef3f70a33a2779b383b3204.framework.js.unityweb',codeUrl:buildUrl+'/0f5c600c5ab9b274fce03a1b210c6a98.wasm.unityweb',streamingAssetsUrl:'StreamingAssets',companyName:"DefaultCompany",productName:"b-card",productVersion:"1.0",devicePixelRatio:Math.min(window.devicePixelRatio||1,1.5),cacheControl:()=> 'no-store',showBanner:(message,type)=>{if(type==='error')fail(message)}};
+const buildVersion='aecad9b0c09246bcb3759701fe3b6540';
 function startGame(){
  const loader=document.createElement('script');loader.src=loaderUrl;loader.onerror=()=>fail('게임 파일을 불러오지 못했습니다.');loader.onload=()=>createUnityInstance(canvas,config,p=>{bar.style.width=Math.round(p*100)+'%';status.textContent='게임 불러오는 중 '+Math.round(p*100)+'%'}).then(()=>{overlay.style.display='none'}).catch(fail);document.body.appendChild(loader);
 }
