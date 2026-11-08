@@ -1,13 +1,57 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#130f0d"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><title>B-card</title>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#130f0d"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><link rel="manifest" href="TemplateData/manifest.webmanifest"><link rel="apple-touch-icon" href="TemplateData/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="B-card"><title>B-card</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100d0b;color:#e6d8c4;font-family:system-ui,sans-serif}body{background:repeating-linear-gradient(92deg,#18120e 0,#211811 3px,#17120e 7px,#120f0d 90px)}#game{position:absolute;inset:0;width:100%;height:100%;display:block;background:#100d0b;touch-action:none}#overlay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(13,10,8,.95);padding:24px}.panel{width:min(400px,90vw);border:1px solid #6c5139;background:#1b1511;padding:34px;text-align:center;box-shadow:0 18px 65px #0009}h1{font-size:32px;letter-spacing:.18em;margin:0 0 12px;color:#d8ba85}p{font-size:14px;line-height:1.6;color:#b8a998}.track{height:3px;background:#433125;margin:24px 0}.bar{height:100%;width:0;background:#c5a06a;transition:width .2s}button{background:#302117;color:#eadfcf;border:1px solid #80613f;padding:10px 20px;cursor:pointer}#error{display:none;color:#ebc2a3}
-</style></head><body><canvas id="game" tabindex="-1"></canvas><div id="overlay"><div class="panel"><h1>B-CARD</h1><p id="status">게임을 준비하고 있습니다.</p><div class="track"><div class="bar" id="progress"></div></div><p id="error" role="alert"></p><button id="retry" style="display:none" onclick="location.reload()">다시 시도</button></div></div>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100d0b;color:#e6d8c4;font-family:system-ui,sans-serif}body{background:repeating-linear-gradient(92deg,#18120e 0,#211811 3px,#17120e 7px,#120f0d 90px)}#game{position:absolute;inset:0;width:100%;height:100%;display:block;background:#100d0b;touch-action:none}#overlay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(13,10,8,.95);padding:24px}.panel{width:min(400px,90vw);border:1px solid #6c5139;background:#1b1511;padding:34px;text-align:center;box-shadow:0 18px 65px #0009}h1{font-size:32px;letter-spacing:.18em;margin:0 0 12px;color:#d8ba85}p{font-size:14px;line-height:1.6;color:#b8a998}.track{height:3px;background:#433125;margin:24px 0}.bar{height:100%;width:0;background:#c5a06a;transition:width .2s}button{background:#302117;color:#eadfcf;border:1px solid #80613f;padding:10px 20px;cursor:pointer}#error{display:none;color:#ebc2a3}#install-help{max-width:min(420px,90vw);background:#1b1511;color:#eadfcf;border:1px solid #80613f;padding:24px}#install-help::backdrop{background:#000b}
+</style></head><body><dialog id="install-help"><h2>홈 화면에 추가</h2><p id="install-instructions"></p><button id="close-help" type="button">닫기</button></dialog><canvas id="game" tabindex="-1"></canvas><div id="overlay"><div class="panel"><h1>B-CARD</h1><p id="status">게임을 준비하고 있습니다.</p><div class="track"><div class="bar" id="progress"></div></div><p id="error" role="alert"></p><button id="retry" style="display:none" onclick="location.reload()">다시 시도</button></div></div>
 <script>
+let installPrompt=null;
+const installHelp=document.getElementById('install-help');
+let installedThisSession=false;
+const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event});
+window.addEventListener('appinstalled',()=>{installPrompt=null;installedThisSession=true});
+window.BCardPwaInstalled=()=>standalone()||installedThisSession;
+window.BCardPwaInstall=()=>{
+ if(window.BCardPwaInstalled())return;
+ if(installPrompt){
+  const prompt=installPrompt;installPrompt=null;
+  try{Promise.resolve(prompt.prompt()).catch(()=>showInstallHelp())}catch(e){showInstallHelp()}
+  return;
+ }
+ showInstallHelp();
+};
+function showInstallHelp(){
+ const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+ const mobile=/Android/i.test(navigator.userAgent);
+ document.getElementById('install-instructions').textContent=ios?'Safari에서 공유 버튼을 누른 뒤 ‘홈 화면에 추가’를 선택하세요.':mobile?'브라우저 메뉴에서 ‘앱 설치’ 또는 ‘홈 화면에 추가’를 선택하세요.':'브라우저 주소창의 설치 아이콘이나 메뉴의 ‘앱 설치’를 선택하세요. 지원되지 않으면 Chrome 또는 Edge에서 열어 주세요.';
+ if(typeof installHelp.showModal==='function')installHelp.showModal();else alert(document.getElementById('install-instructions').textContent);
+}
+document.getElementById('close-help').addEventListener('click',()=>installHelp.close());
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'}).catch(e=>console.warn('Service worker registration failed:',e));
 const canvas=document.getElementById('game'),overlay=document.getElementById('overlay'),status=document.getElementById('status'),bar=document.getElementById('progress'),error=document.getElementById('error');
 function fail(e){status.textContent='게임을 시작하지 못했습니다.';error.textContent=String(e||'브라우저 호환성과 네트워크 연결을 확인해주세요.');error.style.display='block';document.getElementById('retry').style.display='inline-block'}
 window.addEventListener('error',e=>fail(e.message));window.addEventListener('unhandledrejection',e=>fail(e.reason));
-const buildUrl='Build',loaderUrl=buildUrl+'/623b395152364d788a10f053c6ddabc2.loader.js';
-const config={dataUrl:buildUrl+'/27313c5c9aeca69c0d353d9ec92a0c31.data.unityweb',frameworkUrl:buildUrl+'/953cab43f377e093d791af86ed0bc6f4.framework.js.unityweb',codeUrl:buildUrl+'/27bc9a561134224378903d1378739433.wasm.unityweb',streamingAssetsUrl:'StreamingAssets',companyName:"DefaultCompany",productName:"b-card",productVersion:"1.0",devicePixelRatio:Math.min(window.devicePixelRatio||1,1.5),cacheControl:()=> 'no-store',showBanner:(message,type)=>{if(type==='error')fail(message)}};
-const loader=document.createElement('script');loader.src=loaderUrl;loader.onerror=()=>fail('게임 파일을 불러오지 못했습니다.');loader.onload=()=>createUnityInstance(canvas,config,p=>{bar.style.width=Math.round(p*100)+'%';status.textContent='게임 불러오는 중 '+Math.round(p*100)+'%'}).then(()=>{overlay.style.display='none'}).catch(fail);document.body.appendChild(loader);
+const buildUrl='Build',loaderUrl=buildUrl+'/68f2a5554ebbdf57fdef66f300667e61.loader.js';
+const config={dataUrl:buildUrl+'/538b0f087468109fe99a999d03041095.data.unityweb',frameworkUrl:buildUrl+'/745d3302cef3f70a33a2779b383b3204.framework.js.unityweb',codeUrl:buildUrl+'/0f5c600c5ab9b274fce03a1b210c6a98.wasm.unityweb',streamingAssetsUrl:'StreamingAssets',companyName:"DefaultCompany",productName:"b-card",productVersion:"1.0",devicePixelRatio:Math.min(window.devicePixelRatio||1,1.5),cacheControl:()=> 'no-store',showBanner:(message,type)=>{if(type==='error')fail(message)}};
+const buildVersion='73a7f3f424274ff7b143c962a880e208';
+function startGame(){
+ const loader=document.createElement('script');loader.src=loaderUrl;loader.onerror=()=>fail('게임 파일을 불러오지 못했습니다.');loader.onload=()=>createUnityInstance(canvas,config,p=>{bar.style.width=Math.round(p*100)+'%';status.textContent='게임 불러오는 중 '+Math.round(p*100)+'%'}).then(()=>{overlay.style.display='none'}).catch(fail);document.body.appendChild(loader);
+}
+async function checkVersion(){
+ const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),8000);
+ try{
+  const versionUrl=new URL('version.json',document.baseURI);versionUrl.searchParams.set('_',Date.now()+'-'+Math.random().toString(36).slice(2));
+  const response=await fetch(versionUrl,{cache:'no-store',signal:controller.signal});
+  if(!response.ok)throw new Error('Version request failed');
+  const latest=await response.json();
+  if(!latest||!/^[a-f0-9]{32}$/.test(latest.version))throw new Error('Invalid version');
+  if(latest.version!==buildVersion){
+   const next=new URL(location.href);
+   if(next.searchParams.get('bcard_version')===latest.version){fail('최신 버전을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');return}
+   next.searchParams.set('bcard_version',latest.version);status.textContent='새 버전을 불러오고 있습니다.';location.replace(next.href);return;
+  }
+ }catch(e){console.warn('Version check unavailable:',e)}finally{clearTimeout(timeout)}
+ startGame();
+}
+checkVersion();
 </script></body></html>
